@@ -1,4 +1,5 @@
 import http from 'k6/http';
+import {check} from 'k6';
 
 export const options = {
   scenarios: {
@@ -17,5 +18,13 @@ export const options = {
 };
 
 export default function () {
-  http.get('https://ton-domaine/api/search?q=test');
+  const res = http.get('https://restaurant-tonin.fr/api/custom-pages/recrutement');
+
+  check(res, {
+    'status 200': (r) => r.status === 200,
+    'status 404': (r) => r.status === 404,
+    'status 429 (rate limit)': (r) => r.status === 429,
+    'status 5xx': (r) => r.status >= 500,
+    'status 0 (timeout/conn error)': (r) => r.status === 0,
+  });
 }
